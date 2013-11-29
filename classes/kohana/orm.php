@@ -685,6 +685,22 @@ class Kohana_ORM extends Model implements serializable {
 				? $value->pk()
 				: NULL;
 
+			$original_id = NULL;
+
+			if (isset($this->_original_values[$this->_belongs_to[$column]['foreign_key']]))
+			{
+				$original_id = $this->_original_values[$this->_belongs_to[$column]['foreign_key']];
+
+				// Harmonise data types.
+				settype($original_id, gettype($this->_object[$this->_belongs_to[$column]['foreign_key']]));
+			}
+
+			if ($this->_object[$this->_belongs_to[$column]['foreign_key']] === $original_id)
+			{
+				// If the relationship id never changed, don't mark the model as dirty
+				return $this;
+			}
+
 			$this->_changed[$column] = $this->_belongs_to[$column]['foreign_key'];
 
 			// Object is no longer saved or valid
