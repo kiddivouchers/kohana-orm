@@ -1,0 +1,22 @@
+{
+	"name": "widerplan/kohana-orm",
+	"description": "Fork of Kohana ORM",
+	"license": "BSD-3-Clause",
+	"require": {
+		"kohana/database": "3.2.*"
+	},
+	"conflict": {
+		"kohana/orm": "*"
+	},
+	"replace": {
+		"kohana/orm": "3.2.*"
+	},
+	"provide": {
+		"kohana/orm": "self.version"
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-3.2.x": "3.2.x-dev"
+		}
+	}
+}
