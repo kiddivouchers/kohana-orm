@@ -236,6 +236,13 @@ class Kohana_ORM extends Model implements serializable {
 	protected $_errors_filename = NULL;
 
 	/**
+	 * Map of foreign key column names to belongs to relationhips.
+	 *
+	 * @var array
+	 */
+	protected $_foreign_key_columns = array();
+
+	/**
 	 * Constructs a new model and loads a record if given
 	 *
 	 * @param   mixed $id Parameter for find or object to load
@@ -313,6 +320,7 @@ class Kohana_ORM extends Model implements serializable {
 			$defaults['foreign_key'] = $alias.$this->_foreign_key_suffix;
 
 			$this->_belongs_to[$alias] = array_merge($defaults, $details);
+			$this->_foreign_key_columns[$this->_belongs_to[$alias]['foreign_key']] = $alias;
 		}
 
 		foreach ($this->_has_one as $alias => $details)
@@ -673,6 +681,12 @@ class Kohana_ORM extends Model implements serializable {
 
 				// Object is no longer saved or valid
 				$this->_saved = $this->_valid = FALSE;
+
+				if (isset($this->_foreign_key_columns[$column]))
+				{
+					// Changing a belongs to relationship directly!
+					$this->_related[$this->_foreign_key_columns[$column]] = null;
+				}
 			}
 		}
 		elseif (isset($this->_belongs_to[$column]))
