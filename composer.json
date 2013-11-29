@@ -5,14 +5,8 @@
 	"require": {
 		"kohana/database": "3.2.*"
 	},
-	"conflict": {
-		"kohana/orm": "*"
-	},
 	"replace": {
 		"kohana/orm": "3.2.*"
-	},
-	"provide": {
-		"kohana/orm": "self.version"
 	},
 	"extra": {
 		"branch-alias": {
