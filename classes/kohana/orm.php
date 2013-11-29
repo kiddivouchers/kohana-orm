@@ -686,6 +686,9 @@ class Kohana_ORM extends Model implements serializable {
 				: NULL;
 
 			$this->_changed[$column] = $this->_belongs_to[$column]['foreign_key'];
+
+			// Object is no longer saved or valid
+			$this->_saved = $this->_valid = FALSE;
 		}
 		else
 		{
