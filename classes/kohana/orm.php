@@ -704,9 +704,6 @@ class Kohana_ORM extends Model implements serializable {
 			if (isset($this->_original_values[$this->_belongs_to[$column]['foreign_key']]))
 			{
 				$original_id = $this->_original_values[$this->_belongs_to[$column]['foreign_key']];
-
-				// Harmonise data types.
-				settype($original_id, gettype($this->_object[$this->_belongs_to[$column]['foreign_key']]));
 			}
 
 			if ($this->_object[$this->_belongs_to[$column]['foreign_key']] === $original_id)
