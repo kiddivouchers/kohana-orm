@@ -685,14 +685,21 @@ class Kohana_ORM extends Model implements serializable {
 				if (isset($this->_foreign_key_columns[$column]))
 				{
 					// Changing a belongs to relationship directly!
-					$this->_related[$this->_foreign_key_columns[$column]] = null;
+					unset($this->_related[$this->_foreign_key_columns[$column]]);
 				}
 			}
 		}
 		elseif (isset($this->_belongs_to[$column]))
 		{
 			// Update related object itself
-			$this->_related[$column] = $value;
+			if ($value instanceof ORM)
+			{
+				$this->_related[$column] = $value;
+			}
+			else
+			{
+				unset($this->_related[$column]);
+			}
 
 			// Update the foreign key of this model
 			$this->_object[$this->_belongs_to[$column]['foreign_key']] = ($value instanceof ORM)
@@ -704,9 +711,6 @@ class Kohana_ORM extends Model implements serializable {
 			if (isset($this->_original_values[$this->_belongs_to[$column]['foreign_key']]))
 			{
 				$original_id = $this->_original_values[$this->_belongs_to[$column]['foreign_key']];
-
-				// Harmonise data types.
-				settype($original_id, gettype($this->_object[$this->_belongs_to[$column]['foreign_key']]));
 			}
 
 			if ($this->_object[$this->_belongs_to[$column]['foreign_key']] === $original_id)
