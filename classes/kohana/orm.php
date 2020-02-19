@@ -450,11 +450,15 @@ class Kohana_ORM extends Model implements serializable {
 
 		// Only reload the object if we have one to reload
 		if ($this->_loaded)
+		{
 			return $this->clear()
 				->where($this->_object_name.'.'.$this->_primary_key, '=', $primary_key)
 				->find();
+		}
 		else
+		{
 			return $this->clear();
+		}
 	}
 
 	/**
@@ -1422,13 +1426,53 @@ class Kohana_ORM extends Model implements serializable {
 	 *
 	 * @param  string  $alias    Alias of the has_many "through" relationship
 	 * @param  mixed   $far_keys Related model, primary key, or an array of primary keys
-	 * @return Database_Result
+	 * @return boolean
 	 */
 	public function has($alias, $far_keys = NULL)
 	{
+		$count = $this->count_relations($alias, $far_keys);
+
 		if ($far_keys === NULL)
 		{
-			return (bool) DB::select(array('COUNT("*")', 'records_found'))
+			return (bool) $count;
+		}
+		else
+		{
+			if (is_array($far_keys) OR $far_keys instanceof Countable)
+			{
+				$keys = count($far_keys);
+			}
+			else
+			{
+				$keys = 1;
+			}
+
+			return $keys === $count;
+		}
+	}
+
+	/**
+	 * Returns the number of relationships
+	 *
+	 *     // Counts the number of times the login role is attached to $model
+	 *     $model->count_relations('roles', ORM::factory('role', array('name' => 'login')));
+	 *     // Counts the number of times role 5 is attached to $model
+	 *     $model->count_relations('roles', 5);
+	 *     // Counts the number of times any of roles 1, 2, 3, or 4 are attached to
+	 *     // $model
+	 *     $model->count_relations('roles', array(1, 2, 3, 4));
+	 *     // Counts the number roles attached to $model
+	 *     $model->count_relations('roles')
+	 *
+	 * @param  string  $alias    Alias of the has_many "through" relationship
+	 * @param  mixed   $far_keys Related model, primary key, or an array of primary keys
+	 * @return integer
+	 */
+	public function count_relations($alias, $far_keys = NULL)
+	{
+		if ($far_keys === NULL)
+		{
+			return (int) DB::select([DB::expr('COUNT(*)'), 'records_found'])
 				->from($this->_has_many[$alias]['through'])
 				->where($this->_has_many[$alias]['foreign_key'], '=', $this->pk())
 				->execute($this->_db)->get('records_found');
@@ -1441,16 +1485,16 @@ class Kohana_ORM extends Model implements serializable {
 
 		// Nothing to check if the model isn't loaded or we don't have any far_keys
 		if ( ! $far_keys OR ! $this->_loaded)
-			return FALSE;
+			return 0;
 
-		$count = (int) DB::select(array('COUNT("*")', 'records_found'))
+		$count = (int) DB::select([DB::expr('COUNT(*)'), 'records_found'])
 			->from($this->_has_many[$alias]['through'])
 			->where($this->_has_many[$alias]['foreign_key'], '=', $this->pk())
 			->where($this->_has_many[$alias]['far_key'], 'IN', $far_keys)
 			->execute($this->_db)->get('records_found');
 
 		// Rows found need to match the rows searched
-		return $count === count($far_keys);
+		return (int) $count;
 	}
 
 	/**
@@ -1527,14 +1571,14 @@ class Kohana_ORM extends Model implements serializable {
 	 */
 	public function count_all()
 	{
-		$selects = array();
+		$selects = [];
 
 		foreach ($this->_db_pending as $key => $method)
 		{
 			if ($method['name'] == 'select')
 			{
 				// Ignore any selected columns for now
-				$selects[] = $method;
+				$selects[$key] = $method;
 				unset($this->_db_pending[$key]);
 			}
 		}
@@ -1550,8 +1594,8 @@ class Kohana_ORM extends Model implements serializable {
 
 		$this->_build(Database::SELECT);
 
-		$records = $this->_db_builder->from(array($this->_table_name, $this->_object_name))
-			->select(array('COUNT("*")', 'records_found'))
+		$records = $this->_db_builder->from([$this->_table_name, $this->_object_name])
+			->select([DB::expr('COUNT('.$this->_db->quote_column($this->_object_name.'.'.$this->_primary_key).')'), 'records_found'])
 			->execute($this->_db)
 			->get('records_found');
 
@@ -1561,7 +1605,7 @@ class Kohana_ORM extends Model implements serializable {
 		$this->reset();
 
 		// Return the total number of records in a table
-		return $records;
+		return (int) $records;
 	}
 
 	/**
