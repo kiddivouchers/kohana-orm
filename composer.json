@@ -3,6 +3,7 @@
 	"description": "Fork of Kohana ORM",
 	"license": "BSD-3-Clause",
 	"require": {
+		"php": "^8",
 		"kohana/database": "3.2.*"
 	},
 	"replace": {
