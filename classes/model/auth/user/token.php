@@ -11,7 +11,7 @@ class Model_Auth_User_Token extends ORM {
 
 	// Relationships
 	protected $_belongs_to = array('user' => array());
-	
+
 	protected $_created_column = array(
 		'column' => 'created',
 		'format' => TRUE,
@@ -54,7 +54,7 @@ class Model_Auth_User_Token extends ORM {
 		return $this;
 	}
 
-	public function create(Validation $validation = NULL)
+	public function create(?Validation $validation = NULL)
 	{
 		$this->token = $this->create_token();
 
