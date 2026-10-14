@@ -498,20 +498,33 @@ class Kohana_ORM extends Model implements serializable {
 	}
 
 	/**
+	 * Retained in case something else is calling this method directly.
+	 *
+	 * @return string
+	 */
+	#[\Deprecated]
+	public function serialize()
+	{
+		return serialize($this->__serialize());
+	}
+
+	/**
 	 * Allows serialization of only the object data and state, to prevent
 	 * "stale" objects being unserialized, which also requires less memory.
 	 *
 	 * @return string
 	 */
-	public function serialize()
+	public function __serialize(): array
 	{
 		// Store only information about the object
+		$data = array();
+
 		foreach (array('_primary_key_value', '_object', '_changed', '_loaded', '_saved', '_sorting', '_original_values') as $var)
 		{
 			$data[$var] = $this->{$var};
 		}
 
-		return serialize($data);
+		return $data;
 	}
 
 	/**
@@ -529,17 +542,29 @@ class Kohana_ORM extends Model implements serializable {
 	}
 
 	/**
+	 * Retained in case something else is calling this method directly.
+	 *
+	 * @param string $data String for unserialization
+	 * @return  void
+	 */
+	#[\Deprecated]
+	public function unserialize($data)
+	{
+		$this->__unserialize(unserialize($data));
+	}
+
+	/**
 	 * Prepares the database connection and reloads the object.
 	 *
 	 * @param string $data String for unserialization
 	 * @return  void
 	 */
-	public function unserialize($data)
+	public function __unserialize(array $data): void
 	{
 		// Initialize model
 		$this->_initialize();
 
-		foreach (unserialize($data) as $name => $var)
+		foreach ($data as $name => $var)
 		{
 			$this->{$name} = $var;
 		}
